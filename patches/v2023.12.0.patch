@@ -246,15 +246,6 @@ diff --git a/apps/web/src/app/tools/send/access.component.html b/apps/web/src/ap
 index 7b891f4f6f..3abba92ef4 100644
 --- a/apps/web/src/app/tools/send/access.component.html
 +++ b/apps/web/src/app/tools/send/access.component.html
-@@ -2,7 +2,7 @@
-   <div
-     class="tw-mx-auto tw-mt-5 tw-flex tw-max-w-xl tw-flex-col tw-items-center tw-justify-center tw-p-8"
-   >
--    <img class="logo logo-themed" alt="Bitwarden" />
-+    <img class="logo logo-themed" alt="Vaultwarden" />
-     <div class="tw-mt-5 tw-w-full">
-       <h2 bitTypography="h2" class="tw-mb-4 tw-text-center">View Send</h2>
-     </div>
 @@ -69,17 +69,6 @@
      <div class="tw-mt-5 tw-w-10/12 tw-text-center tw-text-muted">
        <p bitTypography="body2" class="tw-mb-0">
@@ -406,6 +397,7 @@ index 05cd9fef4e..60128014d7 100644
 +app-security > app-two-factor-setup > form {
 +  @extend %vw-hide;
 +}
++
 +/**** END Vaultwarden CHANGES ****/
 diff --git a/apps/web/webpack.config.js b/apps/web/webpack.config.js
 index 0254636895..9a2ea1e8fb 100644
