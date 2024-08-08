@@ -41,7 +41,10 @@ fi
 echo "Patching images"
 cp -vfR ../resources/src/* ./apps/web/src/
 
+echo "Remove non-free bitwarden_license/ code"
+rm -rf ./bitwarden_license/
+
 echo "Using patch: ${PATCH_NAME}"
-git apply "../patches/${PATCH_NAME}"
+git apply "../patches/${PATCH_NAME}" --reject
 
 echo "Patching successful!"

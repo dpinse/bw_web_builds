@@ -25,6 +25,7 @@ PATCH_FILENAME="${VAULT_VERSION}.patch"
 if [ "$(git status --porcelain | wc -l)" -ge 1 ]; then
     git --no-pager diff --no-color --minimal --abbrev=10 -- . \
       ':!package-lock.json' \
+      ':!bitwarden_license/' \
       > "../patches/${PATCH_FILENAME}"
     echo "Patch has been created here: patches/${PATCH_FILENAME}"
 else
