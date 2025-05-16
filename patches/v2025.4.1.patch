@@ -120,24 +120,6 @@ index 34bb74ee47..96c865d8bc 100644
  </form>
 -
 -<app-webauthn-login-settings></app-webauthn-login-settings>
-diff --git a/apps/web/src/app/auth/settings/two-factor/two-factor-setup-authenticator.component.ts b/apps/web/src/app/auth/settings/two-factor/two-factor-setup-authenticator.component.ts
-index 030805ed3e..65ee9932db 100644
---- a/apps/web/src/app/auth/settings/two-factor/two-factor-setup-authenticator.component.ts
-+++ b/apps/web/src/app/auth/settings/two-factor/two-factor-setup-authenticator.component.ts
-@@ -222,11 +222,11 @@ export class TwoFactorSetupAuthenticatorComponent
-     new window.QRious({
-       element: document.getElementById("qr"),
-       value:
--        "otpauth://totp/Bitwarden:" +
-+        "otpauth://totp/Vaultwarden:" +
-         Utils.encodeRFC3986URIComponent(email) +
-         "?secret=" +
-         encodeURIComponent(this.key) +
--        "&issuer=Bitwarden",
-+        "&issuer=Vaultwarden",
-       size: 160,
-     });
-   }
 diff --git a/apps/web/src/app/auth/settings/two-factor/two-factor-setup.component.html b/apps/web/src/app/auth/settings/two-factor/two-factor-setup.component.html
 index 4206927772..f77d57c05d 100644
 --- a/apps/web/src/app/auth/settings/two-factor/two-factor-setup.component.html
@@ -196,9 +178,18 @@ index 3b765927c3..393e3bc108 100644
      <app-org-info
        (changedBusinessOwned)="changedOwnedBusiness()"
 diff --git a/apps/web/src/app/billing/organizations/organization-plans.component.ts b/apps/web/src/app/billing/organizations/organization-plans.component.ts
-index 59f8dd34c3..139a6691c1 100644
+index 59f8dd34c3..d45d2f66e3 100644
 --- a/apps/web/src/app/billing/organizations/organization-plans.component.ts
 +++ b/apps/web/src/app/billing/organizations/organization-plans.component.ts
+@@ -12,7 +12,7 @@ import {
+ import { FormBuilder, Validators } from "@angular/forms";
+ import { Router } from "@angular/router";
+ import { Subject, firstValueFrom, takeUntil } from "rxjs";
+-import { debounceTime, map, switchMap } from "rxjs/operators";
++import { map, switchMap } from "rxjs/operators";
+ 
+ import { ManageTaxInformationComponent } from "@bitwarden/angular/billing/components";
+ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 @@ -197,13 +197,12 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
            .organizations$(userId)
            .pipe(getOrganizationById(this.organizationId)),
@@ -225,7 +216,23 @@ index 59f8dd34c3..139a6691c1 100644
  
      if (!this.createOrganization) {
        this.upgradeFlowPrefillForm();
-@@ -301,6 +301,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -268,6 +268,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+ 
+     this.loading = false;
+ 
++    /* no sales tax in vaultwarden
+     this.formGroup.valueChanges.pipe(debounceTime(1000), takeUntil(this.destroy$)).subscribe(() => {
+       this.refreshSalesTax();
+     });
+@@ -285,6 +286,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+         additionalServiceAccounts: 0,
+       });
+     }
++    end of sales tax */
+   }
+ 
+   ngOnDestroy() {
+@@ -301,6 +303,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    }
  
    get upgradeRequiresPaymentMethod() {
@@ -233,7 +240,7 @@ index 59f8dd34c3..139a6691c1 100644
      return (
        this.organization?.productTierType === ProductTierType.Free &&
        !this.showFree &&
-@@ -336,6 +337,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -336,6 +339,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    }
  
    get selectableProducts() {
@@ -241,7 +248,7 @@ index 59f8dd34c3..139a6691c1 100644
      if (this.acceptingSponsorship) {
        const familyPlan = this.passwordManagerPlans.find(
          (plan) => plan.type === PlanType.FamiliesAnnually,
-@@ -367,6 +369,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -367,6 +371,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    }
  
    get selectablePlans() {
@@ -249,7 +256,7 @@ index 59f8dd34c3..139a6691c1 100644
      const selectedProductTierType = this.formGroup.controls.productTier.value;
      const result =
        this.passwordManagerPlans?.filter(
-@@ -497,6 +500,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -497,6 +502,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    }
  
    get planOffersSecretsManager() {
@@ -257,7 +264,7 @@ index 59f8dd34c3..139a6691c1 100644
      return this.selectedSecretsManagerPlan != null;
    }
  
-@@ -505,6 +509,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -505,6 +511,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    }
  
    changedProduct() {
@@ -265,7 +272,7 @@ index 59f8dd34c3..139a6691c1 100644
      const selectedPlan = this.selectablePlans[0];
  
      this.setPlanType(selectedPlan.type);
-@@ -633,9 +638,8 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -633,9 +640,8 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
          const collectionCt = collection.encryptedString;
          const orgKeys = await this.keyService.makeKeyPair(orgKey[1]);
  
@@ -277,7 +284,7 @@ index 59f8dd34c3..139a6691c1 100644
  
          this.toastService.showToast({
            variant: "success",
-@@ -779,7 +783,9 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -779,7 +785,9 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
      request.billingEmail = this.formGroup.controls.billingEmail.value;
      request.initiationPath = "New organization creation in-product";
      request.keys = new OrganizationKeysRequest(orgKeys[0], orgKeys[1].encryptedString);
@@ -287,7 +294,7 @@ index 59f8dd34c3..139a6691c1 100644
      if (this.selectedPlan.type === PlanType.Free) {
        request.planType = PlanType.Free;
      } else {
-@@ -804,6 +810,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -804,6 +812,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
  
      // Secrets Manager
      this.buildSecretsManagerRequest(request);
@@ -295,7 +302,7 @@ index 59f8dd34c3..139a6691c1 100644
  
      if (this.hasProvider) {
        const providerRequest = new ProviderOrganizationCreateRequest(
-@@ -865,6 +872,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -865,6 +874,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    private buildSecretsManagerRequest(
      request: OrganizationCreateRequest | OrganizationUpgradeRequest,
    ): void {
@@ -303,7 +310,7 @@ index 59f8dd34c3..139a6691c1 100644
      const formValues = this.secretsManagerForm.value;
  
      request.useSecretsManager = this.planOffersSecretsManager && formValues.enabled;
-@@ -883,6 +891,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
+@@ -883,6 +893,7 @@ export class OrganizationPlansComponent implements OnInit, OnDestroy {
    }
  
    private upgradeFlowPrefillForm() {
@@ -311,19 +318,6 @@ index 59f8dd34c3..139a6691c1 100644
      if (this.acceptingSponsorship) {
        this.formGroup.controls.productTier.setValue(ProductTierType.Families);
        this.changedProduct();
-diff --git a/apps/web/src/app/core/router.service.ts b/apps/web/src/app/core/router.service.ts
-index ff0aea47b9..21ec31a19a 100644
---- a/apps/web/src/app/core/router.service.ts
-+++ b/apps/web/src/app/core/router.service.ts
-@@ -61,7 +61,7 @@ export class RouterService {
-       .subscribe((event: NavigationEnd) => {
-         this.currentUrl = event.url;
- 
--        let title = i18nService.t("bitWebVault");
-+        let title = "Vaultwarden Web";
- 
-         if (this.currentUrl.includes("/sm/")) {
-           title = i18nService.t("bitSecretsManager");
 diff --git a/apps/web/src/app/core/web-platform-utils.service.ts b/apps/web/src/app/core/web-platform-utils.service.ts
 index 3df2a7d895..f73d811690 100644
 --- a/apps/web/src/app/core/web-platform-utils.service.ts
@@ -346,42 +340,6 @@ index 3df2a7d895..f73d811690 100644
      return process.env.ENV.toString() === "selfhosted";
    }
  
-diff --git a/apps/web/src/app/layouts/frontend-layout.component.html b/apps/web/src/app/layouts/frontend-layout.component.html
-index d19af54f5d..03c8edf631 100644
---- a/apps/web/src/app/layouts/frontend-layout.component.html
-+++ b/apps/web/src/app/layouts/frontend-layout.component.html
-@@ -3,6 +3,12 @@
- <footer class="tw-text-center tw-my-12">
-   <environment-selector></environment-selector>
- 
--  <div bitTypography="body2">&copy; {{ year }} Bitwarden Inc.</div>
-+  <div bitTypography="body2">Vaultwarden Web</div>
-   <div bitTypography="body2">{{ version }}</div>
-+  <br />
-+  <div bitTypography="helper" id="vw-disclaimer">
-+    A modified version of the Bitwarden&reg; Web Vault for Vaultwarden (an unofficial rewrite of the
-+    Bitwarden&reg; server).<br />
-+    Vaultwarden is not associated with the Bitwarden&reg; project nor Bitwarden Inc.
-+  </div>
- </footer>
-diff --git a/apps/web/src/app/layouts/header/web-header.component.html b/apps/web/src/app/layouts/header/web-header.component.html
-index 4b0da4ae56..eebc79db0d 100644
---- a/apps/web/src/app/layouts/header/web-header.component.html
-+++ b/apps/web/src/app/layouts/header/web-header.component.html
-@@ -63,7 +63,12 @@
-                 <i class="bwi bwi-fw bwi-user" aria-hidden="true"></i>
-                 {{ "accountSettings" | i18n }}
-               </a>
--              <a bitMenuItem href="https://bitwarden.com/help/" target="_blank" rel="noreferrer">
-+              <a
-+                bitMenuItem
-+                href="https://github.com/dani-garcia/vaultwarden"
-+                target="_blank"
-+                rel="noreferrer"
-+              >
-                 <i class="bwi bwi-fw bwi-question-circle" aria-hidden="true"></i>
-                 {{ "getHelp" | i18n }}
-               </a>
 diff --git a/apps/web/src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.html b/apps/web/src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.html
 index 08195d95bf..f51a216a14 100644
 --- a/apps/web/src/app/layouts/product-switcher/navigation-switcher/navigation-switcher.component.html
@@ -532,8 +490,7 @@ index 0b8ea86491..5d98411f46 100644
      <meta name="viewport" content="width=1010" />
      <meta name="theme-color" content="#175DDC" />
  
--    <title page-title>Bitwarden Web vault</title>
-+    <title page-title>Vaultwarden Web</title>
+     <title page-title>Bitwarden Web vault</title>
  
      <link rel="apple-touch-icon" sizes="180x180" href="images/icons/apple-touch-icon.png" />
      <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32x32.png" />
@@ -547,8 +504,7 @@ index 0b8ea86491..5d98411f46 100644
      <app-root>
        <!-- Note: any changes to this html need to be made in the app.component.html as well -->
        <div class="tw-p-8 tw-flex">
--        <img class="new-logo-themed" alt="Bitwarden" />
-+        <img class="new-logo-themed" alt="Vaultwarden" />
+         <img class="new-logo-themed" alt="Bitwarden" />
          <div class="spinner-container tw-justify-center">
            <i
              class="bwi bwi-spinner bwi-spin bwi-3x tw-text-muted"
@@ -556,13 +512,6 @@ diff --git a/apps/web/src/manifest.json b/apps/web/src/manifest.json
 index 92a1204c60..d9ff4771a3 100644
 --- a/apps/web/src/manifest.json
 +++ b/apps/web/src/manifest.json
-@@ -1,5 +1,5 @@
- {
--  "name": "Bitwarden Vault",
-+  "name": "Vaultwarden Web",
-   "icons": [
-     {
-       "src": "images/icons/android-chrome-192x192.png",
 @@ -12,6 +12,6 @@
        "type": "image/png"
      }
@@ -644,12 +593,16 @@ index f7d86d2a24..75389727d2 100644
    "settings": {
      "eslint.options": {
 diff --git a/jest.config.js b/jest.config.js
-index e8815f92ff..c635c2fc45 100644
+index e8815f92ff..d752a0bb2a 100644
 --- a/jest.config.js
 +++ b/jest.config.js
-@@ -20,9 +20,6 @@ module.exports = {
-     "<rootDir>/apps/cli/jest.config.js",
-     "<rootDir>/apps/desktop/jest.config.js",
+@@ -16,13 +16,7 @@ module.exports = {
+     prefix: "<rootDir>/",
+   }),
+   projects: [
+-    "<rootDir>/apps/browser/jest.config.js",
+-    "<rootDir>/apps/cli/jest.config.js",
+-    "<rootDir>/apps/desktop/jest.config.js",
      "<rootDir>/apps/web/jest.config.js",
 -    "<rootDir>/bitwarden_license/bit-web/jest.config.js",
 -    "<rootDir>/bitwarden_license/bit-cli/jest.config.js",
@@ -657,28 +610,6 @@ index e8815f92ff..c635c2fc45 100644
  
      "<rootDir>/libs/admin-console/jest.config.js",
      "<rootDir>/libs/angular/jest.config.js",
-diff --git a/libs/auth/src/angular/anon-layout/anon-layout-wrapper.component.ts b/libs/auth/src/angular/anon-layout/anon-layout-wrapper.component.ts
-index 04dc3b6dfd..2791b0bc17 100644
---- a/libs/auth/src/angular/anon-layout/anon-layout-wrapper.component.ts
-+++ b/libs/auth/src/angular/anon-layout/anon-layout-wrapper.component.ts
-@@ -8,6 +8,8 @@ import { AnonLayoutComponent } from "@bitwarden/auth/angular";
- import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
- import { Icon, Translation } from "@bitwarden/components";
- 
-+import { BitwardenShield } from "../icons";
-+
- import { AnonLayoutWrapperDataService } from "./anon-layout-wrapper-data.service";
- 
- export interface AnonLayoutWrapperData {
-@@ -160,7 +162,7 @@ export class AnonLayoutWrapperComponent implements OnInit, OnDestroy {
-   private resetPageData() {
-     this.pageTitle = null;
-     this.pageSubtitle = null;
--    this.pageIcon = null;
-+    this.pageIcon = BitwardenShield;
-     this.showReadonlyHostname = null;
-     this.maxWidth = null;
-     this.titleAreaMaxWidth = null;
 diff --git a/libs/auth/src/angular/anon-layout/anon-layout.component.html b/libs/auth/src/angular/anon-layout/anon-layout.component.html
 index 1e16dba82c..fe3d9b9ebe 100644
 --- a/libs/auth/src/angular/anon-layout/anon-layout.component.html
@@ -692,22 +623,6 @@ index 1e16dba82c..fe3d9b9ebe 100644
    >
      <bit-icon [icon]="logo" [ariaLabel]="'appLogoLabel' | i18n"></bit-icon>
    </a>
-@@ -55,8 +55,14 @@
-       <ng-content select="[slot=environment-selector]"></ng-content>
-     </ng-container>
-     <ng-container *ngIf="!hideYearAndVersion">
--      <div bitTypography="body2">&copy; {{ year }} Bitwarden Inc.</div>
-+      <div bitTypography="body2">Vaultwarden Web</div>
-       <div bitTypography="body2">{{ version }}</div>
-+      <br />
-+      <div bitTypography="helper" id="vw-disclaimer">
-+        A modified version of the Bitwarden&reg; Web Vault for Vaultwarden (an unofficial rewrite of
-+        the Bitwarden&reg; server).<br />
-+        Vaultwarden is not associated with the Bitwarden&reg; project nor Bitwarden Inc.
-+      </div>
-     </ng-container>
-   </footer>
- </main>
 diff --git a/libs/auth/src/angular/login/login-secondary-content.component.ts b/libs/auth/src/angular/login/login-secondary-content.component.ts
 index b608542b37..4f0b86baa7 100644
 --- a/libs/auth/src/angular/login/login-secondary-content.component.ts

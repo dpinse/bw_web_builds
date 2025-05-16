@@ -23,8 +23,8 @@ RUN node --version && npm --version
 # Can be a tag, release, but prefer a commit hash because it's not changeable
 # https://github.com/bitwarden/clients/commit/${VAULT_VERSION}
 #
-# Using https://github.com/bitwarden/clients/releases/tag/web-v2025.4.1
-ARG VAULT_VERSION=2cb810c551ff3216e258754c5d7c86298602b68a
+# Using https://github.com/vaultwarden/vw_web_builds/tree/v2025.5.0
+ARG VAULT_VERSION=0635c0dda2f719ab32c9eea6b9735a4843117236
 ENV VAULT_VERSION=$VAULT_VERSION
 ENV VAULT_FOLDER=bw_clients
 ENV CHECKOUT_TAGS=false
@@ -32,15 +32,12 @@ ENV CHECKOUT_TAGS=false
 RUN mkdir /bw_web_builds
 WORKDIR /bw_web_builds
 
-COPY patches ./patches
-COPY resources ./resources
 COPY scripts ./scripts
 RUN chmod -R +x /bw_web_builds/scripts
 # Use a glob pattern here so builds will continue even if the `.build_env` does not exists
 COPY .build_env* ./
 
 RUN ./scripts/checkout_web_vault.sh
-RUN ./scripts/patch_web_vault.sh
 RUN ./scripts/build_web_vault.sh
 RUN mv "${VAULT_FOLDER}/apps/web/build" ./web-vault
 
